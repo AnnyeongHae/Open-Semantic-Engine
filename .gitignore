@@ -1,0 +1,48 @@
+# ==============================================================================
+# Open Semantic Engine - Git Ignore Rules
+# Strictly separates public open-source code from private data & research notes.
+# ==============================================================================
+
+# 1. Environment & Secrets (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.profiles/
+
+# 2. Python & Package Managers
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+
+# 3. Web & Build Artefacts
+node_modules/
+.next/
+target/
+*.rmeta
+
+# 4. Internal Research Vault & Agent Harness (Local-Only / Gitignored)
+docs/
+.agents/
+AGENTS.md
+.obsidian/
+scratch/
+logs/
+*.log
+
+# 5. Data & Storage Isolation (NEVER COMMIT RAW CRAWLS OR DUCKDB)
+data/
+*.duckdb*
+*.parquet
+
+# 6. Raw AI-Hub Zip Archives & Massive Datasets in tests/
+tests/**/*.zip
+tests/*.*데이터*
+*.zip
+*.tar.gz
+*.7z

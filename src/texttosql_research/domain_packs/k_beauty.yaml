@@ -1,0 +1,89 @@
+domain: K_BEAUTY
+version: 0.1.0
+description: "K-Beauty Skincare & Cosmetics Domain Pack for Semantic Normalization and ABSA"
+
+aspects:
+  - id: ASPECT_MOISTURE
+    canonical_label: "보습력/수분감"
+    keywords: ["보습", "수분", "촉촉", "건조", "당김", "속건조", "물광", "수분감", "유수분", "건성"]
+    positive_cues: ["촉촉", "보습력 짱", "속건조 잡힘", "수분 충전", "물광", "당김 없음"]
+    negative_cues: ["건조함", "속당김", "당겨요", "건조해요", "수분 부족"]
+
+  - id: ASPECT_APPLICATION
+    canonical_label: "발림성"
+    keywords: ["발림성", "발림", "펴발", "발라", "슥슥", "롤링", "밀착"]
+    positive_cues: ["부드럽게", "잘 발려", "발림성 최고", "슥슥 잘", "밀착력 굿", "매끄럽게"]
+    negative_cues: ["뻑뻑", "뭉침", "밀림", "겉돌아요", "잘 안 발려"]
+
+  - id: ASPECT_TROUBLE
+    canonical_label: "트러블/자극"
+    keywords: ["트러블", "뒤집어", "뾰루지", "좁쌀", "여드름", "따가", "화끈", "붉은기", "가려", "자극", "알러지", "모낭염", "안맞", "안 맞"]
+    positive_cues: ["자극 전혀 없음", "순해요", "트러블 진정", "가라앉음", "붉은기 완화", "무자극"]
+    negative_cues: ["피부 뒤집어짐", "뾰루지 올라옴", "좁쌀 생김", "따가워요", "화끈거림", "가려움", "트러블 폭발", "안맞아서", "안 맞"]
+
+  - id: ASPECT_TEXTURE
+    canonical_label: "제형/끈적임"
+    keywords: ["제형", "끈적", "끈적임", "산뜻", "쫀쫀", "캡슐", "묽", "되직", "오일리", "유분기"]
+    positive_cues: ["끈적이지 않", "끈적임 없", "산뜻", "쫀쫀", "가벼움", "빠른 흡수"]
+    negative_cues: ["너무 끈적", "끈적거림", "기름져", "오일리", "캡슐 안 터짐", "무거워"]
+
+  - id: ASPECT_ABSORPTION
+    canonical_label: "흡수력"
+    keywords: ["흡수", "스며", "흡수력", "쏙", "겉돌"]
+    positive_cues: ["흡수 빨라", "쏙 흡수", "흡수력 짱", "금방 스며"]
+    negative_cues: ["흡수 안 됨", "겉돌아요", "흡수 느림"]
+
+  - id: ASPECT_EFFICACY
+    canonical_label: "기능/효과"
+    keywords: ["효과", "재생", "PDRN", "진정", "톤업", "미백", "탄력", "주름", "모공", "결개선"]
+    positive_cues: ["효과 굿", "피부결 개선", "피부 좋아짐", "진정 효과", "탄력 생김", "광채"]
+    negative_cues: ["효과 모르겠", "변화 없음", "효과 없음", "돈 아까움"]
+
+  - id: ASPECT_PRICE_RETURN
+    canonical_label: "가격/반품"
+    keywords: ["가격", "비싸", "저렴", "가성비", "환불", "반품", "배송", "용량"]
+    positive_cues: ["가성비 굿", "저렴", "할인", "재구매", "빠른 배송"]
+    negative_cues: ["반품 거부", "반품 안 됨", "환불 불가", "가격 대비 별로", "비싸요", "용량 적음"]
+
+slangs:
+  - slang: "뒤집어짐"
+    concept_id: "SKIN_TROUBLE_NEGATIVE"
+    aspect: "트러블/자극"
+    sentiment: "NEGATIVE"
+    canonical_label: "피부 트러블 심화"
+
+  - slang: "속건조"
+    concept_id: "MOISTURE_DRY_NEGATIVE"
+    aspect: "보습력/수분감"
+    sentiment: "NEGATIVE"
+    canonical_label: "피부 내부 수분 부족 (속당김)"
+
+  - slang: "겉보속촉"
+    concept_id: "COMPLEX_MOISTURE_FINISH_POSITIVE"
+    aspect: "보습력/수분감"
+    sentiment: "POSITIVE"
+    canonical_label: "겉은 보송하고 속은 촉촉함"
+
+  - slang: "좁쌀"
+    concept_id: "SKIN_TROUBLE_ACNE_NEGATIVE"
+    aspect: "트러블/자극"
+    sentiment: "NEGATIVE"
+    canonical_label: "좁쌀 여드름/트러블 발생"
+
+  - slang: "쫀쫀"
+    concept_id: "TEXTURE_ELASTIC_POSITIVE"
+    aspect: "제형/끈적임"
+    sentiment: "POSITIVE"
+    canonical_label: "탄력 있고 쫀쫀한 제형"
+
+  - slang: "화해템"
+    concept_id: "BRAND_TRUST_POSITIVE"
+    aspect: "기능/효과"
+    sentiment: "POSITIVE"
+    canonical_label: "화해 성분 검증 추천 아이템"
+
+  - slang: "톤그로"
+    concept_id: "COLOR_MISMATCH_NEGATIVE"
+    aspect: "기능/효과"
+    sentiment: "NEGATIVE"
+    canonical_label: "피부 톤과 맞지 않아 어색함"

@@ -1,0 +1,114 @@
+# Wren-style Semantic Layer Definition for K-Beauty Review BI (DuckDB)
+version: 0.1.0
+catalog: semantic_bi
+schema: main
+
+models:
+  - name: raw_documents
+    description: "원문 리뷰 및 기본 메타데이터 테이블"
+    primary_key: document_id
+    columns:
+      - name: document_id
+        type: VARCHAR
+        description: "문서 고유 식별자"
+      - name: source
+        type: VARCHAR
+        description: "수집 출처 (AI_HUB_147 또는 SMARTSTORE_ANUA)"
+      - name: raw_text
+        type: TEXT
+        description: "원본 리뷰 텍스트 (원문 불변)"
+      - name: rating
+        type: INTEGER
+        description: "별점 (1점~5점)"
+      - name: created_at
+        type: TIMESTAMP
+
+  - name: semantic_extractions
+    description: "Kiwi 및 5단계 Token-Diet 파이프라인을 거쳐 정규화된 속성/감성 추출 테이블"
+    primary_key: extraction_id
+    foreign_keys:
+      - column: document_id
+        references: raw_documents.document_id
+    columns:
+      - name: extraction_id
+        type: VARCHAR
+      - name: document_id
+        type: VARCHAR
+      - name: surface_text
+        type: VARCHAR
+        description: "원문에서 발견된 표면 표현/신조어"
+      - name: aspect
+        type: VARCHAR
+        description: "표준 분석 속성 (보습력/수분감, 발림성, 트러블/자극, 제형/끈적임, 흡수력, 기능/효과, 가격/반품)"
+      - name: sentiment
+        type: VARCHAR
+        description: "감성 평가 (POSITIVE, NEGATIVE, NEUTRAL)"
+      - name: evidence_quote
+        type: TEXT
+        description: "원문 내 인용 근거 (CitationMixin 100% 일치)"
+      - name: method
+        type: VARCHAR
+
+relationships:
+  - name: doc_to_extractions
+    from_model: raw_documents
+    to_model: semantic_extractions
+    join_type: one_to_many
+    condition: "raw_documents.document_id = semantic_extractions.document_id"
+
+cubes:
+  - name: review_aspect_cube
+    description: "마케터용 속성-감성 통합 분석 큐브"
+    base_model: semantic_extractions
+    joins:
+      - raw_documents
+    dimensions:
+      - name: aspect
+        column: semantic_extractions.aspect
+      - name: sentiment
+        column: semantic_extractions.sentiment
+      - name: source
+        column: raw_documents.source
+      - name: rating
+        column: raw_documents.rating
+    measures:
+      - name: mention_count
+        calculation: "COUNT(semantic_extractions.extraction_id)"
+        description: "속성 언급 총 건수"
+      - name: negative_count
+        calculation: "COUNT(CASE WHEN semantic_extractions.sentiment = 'NEGATIVE' THEN 1 END)"
+        description: "부정적 불만 언급 건수"
+      - name: positive_count
+        calculation: "COUNT(CASE WHEN semantic_extractions.sentiment = 'POSITIVE' THEN 1 END)"
+        description: "긍정적 만족 언급 건수"
+      - name: negative_rate_pct
+        calculation: "ROUND(COUNT(CASE WHEN semantic_extractions.sentiment = 'NEGATIVE' THEN 1 END) * 100.0 / COUNT(*), 1)"
+        description: "속성별 불만율 (%)"
+
+governed_query_templates:
+  - intent: "불만 속성 순위"
+    sql: |
+      SELECT e.aspect, COUNT(*) as complaint_count
+      FROM semantic_extractions e
+      JOIN raw_documents d ON e.document_id = d.document_id
+      WHERE e.sentiment = 'NEGATIVE' AND d.source = ?
+      GROUP BY e.aspect
+      ORDER BY complaint_count DESC;
+
+  - intent: "만족 속성 순위"
+    sql: |
+      SELECT e.aspect, COUNT(*) as satisfaction_count
+      FROM semantic_extractions e
+      JOIN raw_documents d ON e.document_id = d.document_id
+      WHERE e.sentiment = 'POSITIVE' AND d.source = ?
+      GROUP BY e.aspect
+      ORDER BY satisfaction_count DESC;
+
+  - intent: "아누아 1~2점 부정 리뷰의 주요 불만 원인"
+    sql: |
+      SELECT e.aspect, COUNT(*) as count, ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 1) as ratio_pct
+      FROM semantic_extractions e
+      JOIN raw_documents d ON e.document_id = d.document_id
+      WHERE d.source = 'SMARTSTORE_ANUA' AND d.rating <= 2 AND e.sentiment = 'NEGATIVE'
+      GROUP BY e.aspect
+      ORDER BY count DESC;
